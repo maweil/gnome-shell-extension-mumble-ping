@@ -1,0 +1,7 @@
+node_modules/
+*.mo
+*.compiled
+locale/
+dist/
+lint/
+.eslintrc.yml

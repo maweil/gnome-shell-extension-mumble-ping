@@ -1,0 +1,13 @@
+{
+  "name": "MumblePing",
+  "uuid": "mumble-ping@maweil.github.com",
+  "description": "Displays how many users are currently online on a mumble server",
+  "settings-schema": "org.gnome.shell.extensions.mumble-ping",
+  "gettext-domain": "mumble-ping",
+  "url": "https://github.com/maweil/gnome-shell-extension-mumble-ping",
+  "version": 1,
+  "shell-version": [
+    "3.38",
+    "40"
+  ]
+}

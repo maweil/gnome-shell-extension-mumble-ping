@@ -1,0 +1,21 @@
+{
+  "name": "gnome-shell-extension-mumble-ping",
+  "version": "1.0.0",
+  "description": "Displays the status of a mumble server",
+  "main": "extension.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "gnome-shell",
+    "extension",
+    "GJS"
+  ],
+  "author": "Maximilian Weiler (https://github.com/maweil)",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^7.27.0",
+    "prettier-eslint": "^12.0.0"
+  }
+}

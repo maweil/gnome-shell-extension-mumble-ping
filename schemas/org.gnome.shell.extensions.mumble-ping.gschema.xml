@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+
+  <schema id="org.gnome.shell.extensions.mumble-ping" path="/org/gnome/shell/extensions/mumble-ping/">
+
+    <key type="i" name="refresh-timeout">
+      <default>5</default>
+      <summary>Refresh After Seconds</summary>
+      <description>Refresh Interval in Seconds</description>
+    </key>
+
+    <key type="i" name="mumble-port">
+      <default>64738</default>
+      <summary>Port</summary>
+      <description>Mumble Server Port</description>
+    </key>
+
+    <key type="s" name="mumble-host">
+      <default>'localhost'</default>
+      <summary>Host</summary>
+      <description>Mumble Server Hostname</description>
+    </key>
+
+    <key type="b" name="debug">
+      <default>false</default>
+      <summary>Debug</summary>
+      <description>Log Debug Information</description>
+    </key>
+
+  </schema>
+
+</schemalist>
