@@ -7,6 +7,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 const GETTEXT_DOMAIN = Me.metadata['gettext-domain'];
 const Gettext = imports.gettext.domain(GETTEXT_DOMAIN);
 const _ = Gettext.gettext;
+const MAX_UNIX_PORT = 65535;
 
 // eslint-disable-next-line no-unused-vars
 function init() {
@@ -32,8 +33,8 @@ const MumblePingPrefsWidget = new GObject.registerClass(
             const grid = new Gtk.Grid();
             grid.set_column_spacing(10);
             grid.set_row_spacing(10);
-            this._setMargin(this, 5);
-            this._setMargin(grid, 5);
+            this._setMargin(this, 10);
+            this._setMargin(grid, 10);
             if (GTK_MAJOR_VERSION >= 4)
                 this.set_child(grid);
             else
@@ -41,75 +42,54 @@ const MumblePingPrefsWidget = new GObject.registerClass(
 
             this._settings = ExtensionUtils.getSettings();
 
-            grid.attach(
-                new Gtk.Label({
-                    label: _('Poll Server Every (sec)'),
-                    halign: Gtk.Align.END,
-                }),
-                0,
-                0,
-                1,
-                1
-            );
-            let refreshTimeoutSpinButton = Gtk.SpinButton.new_with_range(
+            const refreshTimeoutLabel = new Gtk.Label({
+                label: _('Poll Server Every (sec)'),
+                halign: Gtk.Align.END,
+            });
+            const refreshTimeoutSpinButton = Gtk.SpinButton.new_with_range(
                 1,
                 60,
                 1
             );
-            grid.attach(refreshTimeoutSpinButton, 1, 0, 1, 1);
-
-            grid.attach(
-                new Gtk.Label({
-                    label: _('Mumble Server'),
-                    halign: Gtk.Align.END,
-                }),
-                0,
-                1,
-                1,
-                1
-            );
+            refreshTimeoutSpinButton.set_hexpand(true);
+            const hostNameLabel = new Gtk.Label({
+                label: _('Mumble Server'),
+                halign: Gtk.Align.END,
+            });
             const hostNameBuffer = Gtk.EntryBuffer.new('', -1);
             const hostNameEntry = Gtk.Entry.new_with_buffer(hostNameBuffer);
-            grid.attach(hostNameEntry, 1, 1, 1, 1);
-
-            grid.attach(
-                new Gtk.Label({
-                    label: _('Mumble Port'),
-                    halign: Gtk.Align.END,
-                }),
-                0,
-                2,
-                1,
-                1
-            );
-
-            const MAX_UNIX_PORT = 65535;
+            const mumblePortLabel = new Gtk.Label({
+                label: _('Mumble Port'),
+                halign: Gtk.Align.END,
+            });
             const mumblePortSpinButton = Gtk.SpinButton.new_with_range(
                 1,
                 MAX_UNIX_PORT,
                 1
             );
+            const debuggingModeLabel = new Gtk.Label({
+                label: _('Debugging Mode'),
+                halign: Gtk.Align.END,
+            });
+            const debugSwitch = new Gtk.Switch();
+            const debugModeHbox = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0);
+            if (GTK_MAJOR_VERSION >= 4)
+                debugModeHbox.append(debugSwitch);
+            else
+                debugModeHbox.add(debugSwitch);
+
+            grid.attach(refreshTimeoutLabel, 0, 0, 1, 1);
+            grid.attach(refreshTimeoutSpinButton, 1, 0, 1, 1);
+
+            grid.attach(hostNameLabel, 0, 1, 1, 1);
+            grid.attach(hostNameEntry, 1, 1, 1, 1);
+
+            grid.attach(mumblePortLabel, 0, 2, 1, 1);
             grid.attach(mumblePortSpinButton, 1, 2, 1, 1);
 
-            grid.attach(
-                new Gtk.Label({
-                    label: _('Debugging Mode'),
-                    halign: Gtk.Align.END,
-                }),
-                0,
-                3,
-                1,
-                1
-            );
+            grid.attach(debuggingModeLabel, 0, 3, 1, 1);
+            grid.attach(debugModeHbox, 1, 3, 1, 1);
 
-            let debugSwitch = new Gtk.Switch();
-            let hBox = Gtk.Box.new(Gtk.Orientation.HORIZONTAL, 0);
-            if (GTK_MAJOR_VERSION >= 4)
-                hBox.append(debugSwitch);
-            else
-                hBox.add(debugSwitch);
-
-            grid.attach(hBox, 1, 3, 1, 1);
             this._settings.bind(
                 'refresh-timeout',
                 refreshTimeoutSpinButton,
