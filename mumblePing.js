@@ -1,6 +1,7 @@
 const Gio = imports.gi.Gio;
 const ByteArray = imports.byteArray;
 const MUMBLE_PING_BODY = '000012345678';
+const MUMBLE_PING_RESPONSE_LEN = 24;
 
 Gio._promisify(
     Gio.SocketClient.prototype,
@@ -42,11 +43,7 @@ function _parseResponseBytes(responseBytes) {
     return result;
 }
 
-async function writeByteStringToConnectionAsync(
-    connection,
-    byteString,
-    cancellable
-) {
+async function _writeByteString(connection, byteString, cancellable) {
     const bytesWritten = await connection.output_stream.write_async(
         Uint8Array.from(byteString),
         0,
@@ -55,7 +52,7 @@ async function writeByteStringToConnectionAsync(
     return bytesWritten;
 }
 
-function readBytesFromConnectionAsync(connection, numBytesToRead, cancellable) {
+function _readBytesFromConnection(connection, numBytesToRead, cancellable) {
     return connection.input_stream
         .read_bytes_async(numBytesToRead, 0, cancellable)
         .then(r => ByteArray.fromGBytes(r));
@@ -71,14 +68,10 @@ function createClient(host, port, cancellable = null) {
 
 // eslint-disable-next-line no-unused-vars
 async function pingMumble(connection, cancellable) {
-    await writeByteStringToConnectionAsync(
+    await _writeByteString(connection, MUMBLE_PING_BODY, cancellable);
+    const responseBytes = await _readBytesFromConnection(
         connection,
-        MUMBLE_PING_BODY,
-        cancellable
-    );
-    const responseBytes = await readBytesFromConnectionAsync(
-        connection,
-        24,
+        MUMBLE_PING_RESPONSE_LEN,
         cancellable
     );
     return _parseResponseBytes(responseBytes);
