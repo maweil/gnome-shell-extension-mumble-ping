@@ -49,16 +49,17 @@ This extension requires one of the following Gnome Shell versions:
 - 3.38
 - 40
 
-### Installing
+### Installation
 
-Once the extension is available there, it's recommended to install this extension
-through [extensions.gnome.org](https://extensions.gnome.org).
+It's recommended to install this extension
+through [extensions.gnome.org](https://extensions.gnome.org/extension/4341/mumbleping/).
 You can visit this extensions install page using the button below.
 
 <p align="center">
-<img width="200px"
-  src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg"
-  alt="Project logo">
+<a href="https://extensions.gnome.org/extension/4341/mumbleping/">
+  <img width="200px"
+    src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg"
+    alt="Project logo"></a>
 </p>
 
 #### Installation from source
