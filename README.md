@@ -16,7 +16,7 @@
 ---
 
 <p align="center">
-Gnome Shell Extension to see how many people ar online on your mumble server of choice.
+Gnome Shell Extension to see how many people are online on your mumble server of choice.
 <img src="img/screenshot.png" alt="Screenshot"/>
 </p>
 
