@@ -121,9 +121,5 @@ const MumblePingPrefsWidget = new GObject.registerClass(
 // eslint-disable-next-line no-unused-vars
 function buildPrefsWidget() {
     const prefsWidget = new MumblePingPrefsWidget();
-    if (GTK_MAJOR_VERSION < 4) {
-        prefsWidget.show_all();
-        prefsWidget.connect('destroy', Gtk.main_quit);
-    }
     return prefsWidget;
 }
