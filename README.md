@@ -48,6 +48,7 @@ This extension requires one of the following Gnome Shell versions:
 
 - 3.38
 - 40
+- 41
 
 ### Installation
 
