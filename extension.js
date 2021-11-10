@@ -177,6 +177,7 @@ const MumblePingIndicator = GObject.registerClass(
                     this._log('Cancelled previous operation');
                     this._setIndicatorToError();
                 } else {
+                    this._connection = null;
                     this._handleError(error, '_mainLoop');
                 }
             }

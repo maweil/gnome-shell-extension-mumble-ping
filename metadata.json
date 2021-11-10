@@ -5,9 +5,10 @@
   "settings-schema": "org.gnome.shell.extensions.mumble-ping",
   "gettext-domain": "mumble-ping",
   "url": "https://github.com/maweil/gnome-shell-extension-mumble-ping",
-  "version": 1,
+  "version": 2,
   "shell-version": [
     "3.38",
-    "40"
+    "40",
+    "41"
   ]
 }
