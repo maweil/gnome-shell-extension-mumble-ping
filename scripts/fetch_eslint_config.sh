@@ -1,7 +1,7 @@
 #!/bin/bash
 mkdir -p ./lint
-wget https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/master/.eslintrc.yml
+wget https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/main/.eslintrc.yml
 cd lint
-wget https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/master/lint/eslintrc-gjs.yml
-wget https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/master/lint/eslintrc-shell.yml
-wget https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/master/lint/eslintrc-legacy.yml
+wget https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/main/lint/eslintrc-gjs.yml
+wget https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/main/lint/eslintrc-shell.yml
+wget https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/main/lint/eslintrc-legacy.yml
