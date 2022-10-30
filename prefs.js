@@ -48,7 +48,7 @@ const MumblePingPrefsWidget = new GObject.registerClass(
             });
             const refreshTimeoutSpinButton = Gtk.SpinButton.new_with_range(
                 1,
-                60,
+                3600,
                 1
             );
             refreshTimeoutSpinButton.set_hexpand(true);
