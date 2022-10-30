@@ -50,6 +50,7 @@ This extension requires one of the following Gnome Shell versions:
 - 40
 - 41
 - 42
+- 43
 
 ### Installation
 
