@@ -68,7 +68,7 @@ const MumblePingPrefsWidget = new GObject.registerClass(
                 1
             );
             const debuggingModeLabel = new Gtk.Label({
-                label: _('Debugging Mode'),
+                label: _('Debug Mode'),
                 halign: Gtk.Align.END,
             });
             const debugSwitch = new Gtk.Switch();
