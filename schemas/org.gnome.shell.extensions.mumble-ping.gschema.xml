@@ -27,6 +27,12 @@
       <description>Log Debug Information</description>
     </key>
 
+    <key type="b" name="enabled">
+      <default>true</default>
+      <summary>Enabled</summary>
+      <description>Enabled or disabled refresh of the indicator</description>
+    </key>
+
   </schema>
 
 </schemalist>
