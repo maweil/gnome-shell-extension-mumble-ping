@@ -1,0 +1,46 @@
+# gnome-shell-extension-mumble-ping
+# Copyright (C) 2023
+# This file is distributed under the same license as the gnome-shell-extension-mumble-ping repository.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-shell-extension-mumble-ping 5\n"
+"Report-Msgid-Bugs-To: https://github.com/maweil/gnome-shell-extension-mumble-ping/issues\n"
+"POT-Creation-Date: 2023-04-02 22:31+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: extension.js:36
+msgid "Mumble Ping"
+msgstr ""
+
+#: extension.js:142
+msgid "Settings"
+msgstr ""
+
+#: extension.js:146
+msgid "Enable/Disable"
+msgstr ""
+
+#: prefs.js:46
+msgid "Poll Server Every (sec)"
+msgstr ""
+
+#: prefs.js:56
+msgid "Mumble Server"
+msgstr ""
+
+#: prefs.js:62
+msgid "Mumble Port"
+msgstr ""
+
+#: prefs.js:71
+msgid "Debug Mode"
+msgstr ""

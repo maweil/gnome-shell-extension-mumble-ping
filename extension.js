@@ -1,4 +1,4 @@
-const { GObject, St, Clutter, GLib, Gio } = imports.gi;
+const {GObject, St, Clutter, GLib, Gio} = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -13,6 +13,7 @@ const PopupMenu = imports.ui.popupMenu;
 
 const MumblePing = Me.imports.mumblePing;
 const Status = {
+    DISABLED: 0,
     NEUTRAL: 1,
     ERROR: 2,
     WAITING: 3,
@@ -47,9 +48,11 @@ const MumblePingIndicator = GObject.registerClass(
             this._attachSettingsSignalHandlers();
             this._log(`${Me.metadata.name}: Running`);
 
-            // Refresh indicator on extension start immediately
-            this._mainLoop();
-            this._startMainLoop();
+            if (this._settings.get_boolean('enabled')) {
+                // Refresh indicator on extension start immediately
+                this._mainLoop();
+                this._startMainLoop();
+            }
         }
 
         _setupWidgets() {
@@ -105,6 +108,7 @@ const MumblePingIndicator = GObject.registerClass(
 
         /**
          * Log a message if the extension is currently in debug mode
+         *
          * @param {string} msg Message to log
          */
         _log(msg) {
@@ -139,7 +143,29 @@ const MumblePingIndicator = GObject.registerClass(
             this._settingsMenuItem.connect('activate', () => {
                 Util.spawn(['gnome-extensions', 'prefs', Me.metadata.uuid]);
             });
+            this._enableDisableMenuItem = new PopupMenu.PopupSwitchMenuItem(_('Enable/Disable'), this._settings.get_boolean('enabled'));
+            this._enableDisableMenuItem.connect('activate', () => {
+                this._toggleEnableDisable();
+            });
+            this.menu.addMenuItem(this._enableDisableMenuItem);
+            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             this.menu.addMenuItem(this._settingsMenuItem);
+        }
+
+        _toggleEnableDisable() {
+            const enabledNow = !this._settings.get_boolean('enabled');
+            this._log(`Setting status of indicator to ${enabledNow ? 'enabled' : 'disabled'}`);
+            this._stopMainLoop();
+            this._settings.set_boolean('enabled', enabledNow);
+            if (enabledNow) {
+                this._setIndicatorToWaiting();
+                this._mainLoop();
+                this._startMainLoop();
+            } else {
+                this._cancelPreviousIteration();
+                this._numUsersLabel.set_text('');
+                this._indicatorStatus.status = Status.DISABLED;
+            }
         }
 
         _cancelPreviousIteration() {
@@ -193,7 +219,8 @@ const MumblePingIndicator = GObject.registerClass(
 
         /**
          * Update the indicator based on the ping response
-         * @param {Object} pingResponse Response of the status ping
+         *
+         * @param {object} pingResponse Response of the status ping
          */
         _updateIndicator(pingResponse) {
             let updateNeeded = this._hasStatusChanged(pingResponse);
