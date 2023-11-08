@@ -5,42 +5,52 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: 6\n"
 "Report-Msgid-Bugs-To: https://github.com/maweil/gnome-shell-extension-mumble-"
 "ping/issues\n"
 "POT-Creation-Date: 2023-04-02 22:31+0200\n"
-"PO-Revision-Date: 2021-05-28 23:13+0200\n"
+"PO-Revision-Date: 2023-11-08 21:39+0100\n"
+"Last-Translator: \n"
 "Language-Team: German\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.1\n"
 
-#: extension.js:36
+#: extension.js:63
 msgid "Mumble Ping"
 msgstr "Mumble Ping"
 
-#: extension.js:142
-msgid "Settings"
-msgstr "Einstellungen"
-
-#: extension.js:146
+#: extension.js:168
 msgid "Enable/Disable"
 msgstr "Ein/Aus"
 
-#: prefs.js:46
+#: extension.js:174
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: prefs.js:12
+msgid "General Settings"
+msgstr "Allgemein"
+
+#: prefs.js:15
+msgid "Connection"
+msgstr "Verbindung"
+
+#: prefs.js:18
 msgid "Poll Server Every (sec)"
 msgstr "Server anfragen alle (Sekunden)"
 
-#: prefs.js:56
+#: prefs.js:31
 msgid "Mumble Server"
 msgstr "Mumble Server"
 
-#: prefs.js:62
+#: prefs.js:34
 msgid "Mumble Port"
 msgstr "Mumble Port"
 
-#: prefs.js:71
+#: prefs.js:48
 msgid "Debug Mode"
 msgstr "Debug-Modus"
