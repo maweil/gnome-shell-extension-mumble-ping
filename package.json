@@ -4,6 +4,8 @@
   "description": "Displays the status of a mumble server",
   "main": "extension.js",
   "private": true,
+  "module": "extension.js",
+  "type": "module",
   "scripts": {
     "lint": "eslint *.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,8 +18,8 @@
   "author": "Maximilian Weiler (https://github.com/maweil)",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "eslint": "^8.25.0",
-    "eslint-plugin-jsdoc": "^39.3.13",
-    "prettier-eslint": "15.0.1"
+    "eslint": "^8.53.0",
+    "eslint-plugin-jsdoc": "^46.8.2",
+    "prettier-eslint": "16.1.2"
   }
 }

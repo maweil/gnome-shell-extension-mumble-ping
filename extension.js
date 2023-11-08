@@ -1,17 +1,17 @@
-const {GObject, St, Clutter, GLib, Gio} = imports.gi;
+import St from 'gi://St';
+import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+import {
+    Extension,
+    gettext as _
+} from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as MumblePing from './mumblePing.js';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const GETTEXT_DOMAIN = Me.metadata['gettext-domain'];
-const Gettext = imports.gettext.domain(GETTEXT_DOMAIN);
-const _ = Gettext.gettext;
-
-const Util = imports.misc.util;
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
-
-const MumblePing = Me.imports.mumblePing;
 const Status = {
     DISABLED: 0,
     NEUTRAL: 1,
@@ -31,276 +31,289 @@ const Settings = {
 };
 
 const MumblePingIndicator = GObject.registerClass(
-    class Indicator extends PanelMenu.Button {
-        _init() {
-            super._init(0.0, _('Mumble Ping'));
-            this._settingsSignalHandlers = [];
-            this._autoCancel = null;
-            this._indicatorStatus = {
-                lastResponse: null,
-                status: Status.NEUTRAL,
-            };
-            this._settings = ExtensionUtils.getSettings();
-            this._debugMode = this._settings.get_boolean('debug');
+  class Indicator extends PanelMenu.Button {
+      #settings;
+      #mumbleIcon;
+      #numUsersLabel;
+      #settingsSignalHandlers;
+      #indicatorStatus;
+      #isDebugModeEnabled;
+      #autoCancel;
+      #connection;
+      #mainLoopTimeout;
+      #metadata;
+      #dir;
 
-            this._setupWidgets();
+      constructor(params = {}) {
+          super(0.0, _('Mumble Ping'), false);
+          this.#settings = params.settings;
+          this.#metadata = params.metadata;
+          this.#dir = params.dir;
+          this.#settingsSignalHandlers = [];
+          this.#indicatorStatus = {
+              lastResponse: null,
+              status: Status.NEUTRAL,
+          };
+          this.#isDebugModeEnabled = this.#settings.get_boolean('debug');
 
-            this._attachSettingsSignalHandlers();
-            this._log(`${Me.metadata.name}: Running`);
+          this.#setupWidgets();
 
-            if (this._settings.get_boolean('enabled')) {
-                // Refresh indicator on extension start immediately
-                this._mainLoop();
-                this._startMainLoop();
-            }
-        }
+          this.#attachSettingsSignalHandlers();
 
-        _setupWidgets() {
-            this._menuLayout = new St.BoxLayout();
-            this._mumbleIcon = new St.Icon({
-                style_class: 'system-status-icon',
-            });
-            this._setIndicatorIcon(Icon.NEUTRAL);
-            this._numUsersLabel = new St.Label({
-                text: '',
-                y_expand: true,
-                y_align: Clutter.ActorAlign.CENTER,
-            });
-            this._menuLayout.add_actor(this._mumbleIcon);
-            this._menuLayout.add_actor(this._numUsersLabel);
-            this.add_actor(this._menuLayout);
+          if (this.#settings.get_boolean('enabled')) {
+              // Refresh indicator on extension start immediately
+              this.#mainLoop();
+              this.#startMainLoop();
+          }
+      }
 
-            this._setupPopupMenu();
-        }
+      #setupWidgets() {
+          const menuLayout = new St.BoxLayout();
+          this.#mumbleIcon = new St.Icon({
+              style_class: 'system-status-icon',
+          });
+          this.#setIndicatorIcon(Icon.NEUTRAL);
+          this.#numUsersLabel = new St.Label({
+              text: '',
+              y_expand: true,
+              y_align: Clutter.ActorAlign.CENTER,
+          });
+          menuLayout.add_actor(this.#mumbleIcon);
+          menuLayout.add_actor(this.#numUsersLabel);
+          this.add_actor(menuLayout);
+      }
 
-        _attachSignalHandler(signalName) {
-            const restart = () => {
-                this._setIndicatorToWaiting();
-                this._stopMainLoop();
-                this._startMainLoop();
-            };
-            this._settingsSignalHandlers.push(
-                this._settings.connect(`changed::${signalName}`, () => {
-                    this._log(`Changed ${signalName}`);
-                    restart();
-                })
-            );
-        }
+      #attachSignalHandler(signalName) {
+          const restart = () => {
+              this.#setIndicatorToWaiting();
+              this.#stopMainLoop();
+              this.#startMainLoop();
+          };
+          this.#settingsSignalHandlers.push(
+              this.#settings.connect(`changed::${signalName}`, () => {
+                  this.#log(`Changed ${signalName}`);
+                  restart();
+              })
+          );
+      }
 
-        _setIndicatorToWaiting() {
-            if (this._indicatorStatus.status !== Status.WAITING) {
-                this._numUsersLabel.set_text('...');
-                this._indicatorStatus.status = Status.WAITING;
-            }
-        }
+      #setIndicatorToWaiting() {
+          if (this.#indicatorStatus.status !== Status.WAITING) {
+              this.#numUsersLabel.set_text('...');
+              this.#indicatorStatus.status = Status.WAITING;
+          }
+      }
 
-        _attachSettingsSignalHandlers() {
-            this._attachSignalHandler(Settings.MUMBLE_PORT);
-            this._attachSignalHandler(Settings.MUMBLE_HOST);
-            this._attachSignalHandler(Settings.REFRESH_TIMEOUT);
-            this._settingsSignalHandlers.push(
-                this._settings.connect('changed::debug', () => {
-                    this._log('Changed debug mode setting');
-                    this._debugMode = this._settings.get_boolean('debug');
-                })
-            );
-        }
+      #attachSettingsSignalHandlers() {
+          this.#attachSignalHandler(Settings.MUMBLE_PORT);
+          this.#attachSignalHandler(Settings.MUMBLE_HOST);
+          this.#attachSignalHandler(Settings.REFRESH_TIMEOUT);
+          this.#settingsSignalHandlers.push(
+              this.#settings.connect('changed::debug', () => {
+                  this.#log('Changed debug mode setting');
+                  this.#isDebugModeEnabled = this.#settings.get_boolean('debug');
+              })
+          );
+      }
 
-        /**
-         * Log a message if the extension is currently in debug mode
-         *
-         * @param {string} msg Message to log
-         */
-        _log(msg) {
-            if (this._debugMode)
-                log(`${Me.metadata.name}: ${msg}`);
-        }
+      /**
+       * Log a message if the extension is currently in debug mode
+       *
+       * @param {string} msg Message to log
+       */
+      #log(msg) {
+          if (this.#isDebugModeEnabled)
+              console.log(`${this.#metadata.name}: ${msg}`);
+      }
 
-        _startMainLoop() {
-            this._mainLoopTimeout = GLib.timeout_add_seconds(
-                GLib.PRIORITY_DEFAULT,
-                this._settings.get_int(Settings.REFRESH_TIMEOUT),
-                () => {
-                    this._mainLoop();
-                    return true;
-                }
-            );
-        }
+      #startMainLoop() {
+          this.#mainLoopTimeout = GLib.timeout_add_seconds(
+              GLib.PRIORITY_DEFAULT,
+              this.#settings.get_int(Settings.REFRESH_TIMEOUT),
+              () => {
+                  this.#mainLoop();
+                  return true;
+              }
+          );
+      }
 
-        /**
-         * Stop the main loop and clear the connection
-         */
-        _stopMainLoop() {
-            if (this._mainLoopTimeout) {
-                GLib.source_remove(this._mainLoopTimeout);
-                this._mainLoopTimeout = null;
-            }
-            this._connection = null;
-        }
+      /**
+       * Stop the main loop and clear the connection
+       */
+      #stopMainLoop() {
+          if (this.#mainLoopTimeout) {
+              GLib.source_remove(this.#mainLoopTimeout);
+              this.#mainLoopTimeout = null;
+          }
+          this.#connection = null;
+      }
 
-        _setupPopupMenu() {
-            this._settingsMenuItem = new PopupMenu.PopupMenuItem(_('Settings'));
-            this._settingsMenuItem.connect('activate', () => {
-                Util.spawn(['gnome-extensions', 'prefs', Me.metadata.uuid]);
-            });
-            this._enableDisableMenuItem = new PopupMenu.PopupSwitchMenuItem(_('Enable/Disable'), this._settings.get_boolean('enabled'));
-            this._enableDisableMenuItem.connect('activate', () => {
-                this._toggleEnableDisable();
-            });
-            this.menu.addMenuItem(this._enableDisableMenuItem);
-            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-            this.menu.addMenuItem(this._settingsMenuItem);
-        }
+      toggleEnableDisable() {
+          const enabledNow = !this.#settings.get_boolean('enabled');
+          this.#log(
+              `Setting status of indicator to ${enabledNow ? 'enabled' : 'disabled'}`
+          );
+          this.#stopMainLoop();
+          this.#settings.set_boolean('enabled', enabledNow);
+          if (enabledNow) {
+              this.#setIndicatorToWaiting();
+              this.#mainLoop();
+              this.#startMainLoop();
+          } else {
+              this.#cancelPendingRequests();
+              this.#numUsersLabel.set_text('');
+              this.#indicatorStatus.status = Status.DISABLED;
+          }
+      }
 
-        _toggleEnableDisable() {
-            const enabledNow = !this._settings.get_boolean('enabled');
-            this._log(`Setting status of indicator to ${enabledNow ? 'enabled' : 'disabled'}`);
-            this._stopMainLoop();
-            this._settings.set_boolean('enabled', enabledNow);
-            if (enabledNow) {
-                this._setIndicatorToWaiting();
-                this._mainLoop();
-                this._startMainLoop();
-            } else {
-                this._cancelPreviousIteration();
-                this._numUsersLabel.set_text('');
-                this._indicatorStatus.status = Status.DISABLED;
-            }
-        }
+      #cancelPendingRequests() {
+          this.#autoCancel?.cancel();
+          this.#autoCancel = null;
+      }
 
-        _cancelPreviousIteration() {
-            if (this._autoCancel) {
-                this._autoCancel.cancel();
-                this._autoCancel = null;
-            }
-        }
+      async #mainLoop() {
+          try {
+              this.#cancelPendingRequests();
+              this.#autoCancel = new Gio.Cancellable();
+              if (!this.#connection) {
+                  const port = this.#settings.get_int(Settings.MUMBLE_PORT);
+                  const host = this.#settings.get_string(Settings.MUMBLE_HOST);
+                  this.#log(`Connecting to ${host} on port ${port}`);
+                  this.#connection = await MumblePing.createClient(
+                      host,
+                      port,
+                      this.#autoCancel
+                  );
+              }
+              this.#log('Sending Ping');
+              let pingResponse = await MumblePing.pingMumble(
+                  this.#connection,
+                  this.#autoCancel
+              );
+              this.#autoCancel = null;
+              this.#updateIndicator(pingResponse);
+          } catch (error) {
+              if (error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
+                  this.#log('Cancelled previous operation');
+                  this.#setIndicatorToError();
+              } else {
+                  this.#connection = null;
+                  this.#handleError(error, '_mainLoop');
+              }
+          }
+      }
 
-        async _mainLoop() {
-            try {
-                this._cancelPreviousIteration();
-                this._autoCancel = new Gio.Cancellable();
-                if (!this._connection) {
-                    const port = this._settings.get_int(Settings.MUMBLE_PORT);
-                    const host = this._settings.get_string(
-                        Settings.MUMBLE_HOST
-                    );
-                    this._log(`Connecting to ${host} on port ${port}`);
-                    this._connection = await MumblePing.createClient(
-                        host,
-                        port,
-                        this._autoCancel
-                    );
-                }
-                this._log('Sending Ping');
-                let pingResponse = await MumblePing.pingMumble(
-                    this._connection,
-                    this._autoCancel
-                );
-                this._autoCancel = null;
-                this._updateIndicator(pingResponse);
-            } catch (error) {
-                if (error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
-                    this._log('Cancelled previous operation');
-                    this._setIndicatorToError();
-                } else {
-                    this._connection = null;
-                    this._handleError(error, '_mainLoop');
-                }
-            }
-        }
+      #setIndicatorIcon(iconFileName) {
+          const iconPath = this.#dir
+        .get_child('icons')
+        .get_child(iconFileName)
+        .get_path();
+          this.#mumbleIcon.set_gicon(Gio.Icon.new_for_string(iconPath));
+      }
 
-        _setIndicatorIcon(iconFileName) {
-            const iconPath = Me.dir
-                .get_child('icons')
-                .get_child(iconFileName)
-                .get_path();
-            this._mumbleIcon.set_gicon(Gio.Icon.new_for_string(iconPath));
-        }
+      /**
+       * Update the indicator based on the ping response
+       *
+       * @param {object} pingResponse Response of the status ping
+       */
+      #updateIndicator(pingResponse) {
+          if (this.#hasStatusChanged(pingResponse)) {
+              this.#numUsersLabel.set_text(
+                  `${pingResponse.users}/${pingResponse.maxUsers}`
+              );
+              if (this.#indicatorStatus.status !== Status.NEUTRAL)
+                  this.#setIndicatorIcon(Icon.NEUTRAL);
 
-        /**
-         * Update the indicator based on the ping response
-         *
-         * @param {object} pingResponse Response of the status ping
-         */
-        _updateIndicator(pingResponse) {
-            let updateNeeded = this._hasStatusChanged(pingResponse);
-            if (updateNeeded) {
-                this._numUsersLabel.set_text(
-                    `${pingResponse.users}/${pingResponse.maxUsers}`
-                );
-                if (this._indicatorStatus.status !== Status.NEUTRAL)
-                    this._setIndicatorIcon(Icon.NEUTRAL);
+              this.#indicatorStatus.lastResponse = pingResponse;
+              this.#indicatorStatus.status = Status.NEUTRAL;
+          }
+      }
 
-                this._indicatorStatus.lastResponse = pingResponse;
-                this._indicatorStatus.status = Status.NEUTRAL;
-            }
-        }
+      #setIndicatorToError() {
+          if (!this.#indicatorStatus.status)
+              return;
+          if (this.#indicatorStatus.status !== Status.ERROR) {
+              this.#setIndicatorIcon(Icon.ERROR);
+              this.#numUsersLabel.set_text('');
+              this.#indicatorStatus.status = Status.ERROR;
+          }
+      }
 
-        _setIndicatorToError() {
-            if (!this._indicatorStatus.status)
-                return;
-            if (this._indicatorStatus.status !== Status.ERROR) {
-                this._setIndicatorIcon(Icon.ERROR);
-                this._numUsersLabel.set_text('');
-                this._indicatorStatus.status = Status.ERROR;
-            }
-        }
+      #handleError(error, method = '') {
+          this.#log(`${method}: ${error}`);
+          this.#setIndicatorToError();
+      }
 
-        _handleError(error, method = '') {
-            this._log(`${method}: ${error}`);
-            this._setIndicatorToError();
-        }
+      #hasStatusChanged(result) {
+          if (!result)
+              return false;
+          let lastNumUsers = this.#indicatorStatus.lastResponse?.users;
+          let lastMaxUsers = this.#indicatorStatus.lastResponse?.maxUsers;
+          let lastStatus = this.#indicatorStatus.status;
+          let updateNeeded =
+        result.users !== lastNumUsers ||
+        result.maxUsers !== lastMaxUsers ||
+        lastStatus !== Status.NEUTRAL;
+          return updateNeeded;
+      }
 
-        _hasStatusChanged(result) {
-            if (!result)
-                return false;
-            let lastNumUsers = this._indicatorStatus.lastResponse?.users;
-            let lastMaxUsers = this._indicatorStatus.lastResponse?.maxUsers;
-            let lastStatus = this._indicatorStatus.status;
-            let updateNeeded =
-                result.users !== lastNumUsers ||
-                result.maxUsers !== lastMaxUsers ||
-                lastStatus !== Status.NEUTRAL;
-            return updateNeeded;
-        }
-
-        _onDestroy() {
-            this._log('Indicator._onDestroy()');
-            this._stopMainLoop();
-            if (this._autoCancel) {
-                this._autoCancel.cancel();
-                this._autoCancel = null;
-            }
-            this._settingsSignalHandlers.forEach(handle => {
-                this._settings.disconnect(handle);
-            });
-            this._settingsSignalHandlers = null;
-            this._menuLayout = null;
-            this._indicatorStatus = null;
-            this._settings = null;
-            super._onDestroy();
-        }
-    }
+      _onDestroy() {
+          this.#stopMainLoop();
+          this.#cancelPendingRequests();
+          this.#settingsSignalHandlers.forEach(handle => {
+              this.#settings.disconnect(handle);
+          });
+          this.#settingsSignalHandlers = null;
+          this.#indicatorStatus = null;
+          this.#settings = null;
+          super._onDestroy();
+      }
+  }
 );
 
-class Extension {
-    constructor(uuid) {
-        this._uuid = uuid;
-        ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
+export default class MumblePingExtension extends Extension {
+    #indicator;
+    #settings;
+
+    #setupPopupMenu() {
+        const enableDisableMenuItem = new PopupMenu.PopupSwitchMenuItem(
+            _('Enable/Disable'),
+            this.#settings.get_boolean('enabled')
+        );
+        enableDisableMenuItem.connect('activate', () => {
+            this.#indicator.toggleEnableDisable();
+        });
+        this.#indicator.menu.addMenuItem(enableDisableMenuItem);
+        this.#indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.#indicator.menu.addAction(_('Settings'), () => {
+            this.openPreferences();
+        });
     }
 
     enable() {
-        this._mumbleIndicator = new MumblePingIndicator();
-        Main.panel.addToStatusArea(this._uuid, this._mumbleIndicator);
+        this.#settings = this.getSettings();
+        this.#indicator = new MumblePingIndicator({
+            metadata: this.metadata,
+            settings: this.#settings,
+            dir: this.dir,
+        });
+        this.#setupPopupMenu();
+        Main.panel.addToStatusArea(this.uuid, this.#indicator);
     }
 
     disable() {
-        this._mumbleIndicator.destroy();
-        this._mumbleIndicator = null;
+        this.#log('disabling extension.');
+        this.#indicator?.destroy();
+        this.#indicator = null;
     }
-}
 
-// eslint-disable-next-line no-unused-vars
-function init(meta) {
-    return new Extension(meta.uuid);
+    /**
+     * Log a message if the extension is currently in debug mode
+     *
+     * @param {string} msg Message to log
+     */
+    #log(msg) {
+        if (this.#settings.get_boolean('debug'))
+            console.log(`${this.metadata.name}: ${msg}`);
+    }
 }
