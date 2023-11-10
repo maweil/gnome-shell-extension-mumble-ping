@@ -85,9 +85,11 @@ const MumblePingIndicator = GObject.registerClass(
 
       #attachSignalHandler(signalName) {
           const restart = () => {
-              this.#setIndicatorToWaiting();
               this.#stopMainLoop();
-              this.#startMainLoop();
+              if (this.#settings.get_boolean('enabled')) {
+                  this.#setIndicatorToWaiting();
+                  this.#startMainLoop();
+              }
           };
           this.#settingsSignalHandlers.push(
               this.#settings.connect(`changed::${signalName}`, () => {
@@ -275,21 +277,6 @@ export default class MumblePingExtension extends Extension {
     #indicator;
     #settings;
 
-    #setupPopupMenu() {
-        const enableDisableMenuItem = new PopupMenu.PopupSwitchMenuItem(
-            _('Enable/Disable'),
-            this.#settings.get_boolean('enabled')
-        );
-        enableDisableMenuItem.connect('activate', () => {
-            this.#indicator.toggleEnableDisable();
-        });
-        this.#indicator.menu.addMenuItem(enableDisableMenuItem);
-        this.#indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        this.#indicator.menu.addAction(_('Settings'), () => {
-            this.openPreferences();
-        });
-    }
-
     enable() {
         this.#settings = this.getSettings();
         this.#indicator = new MumblePingIndicator({
@@ -305,6 +292,22 @@ export default class MumblePingExtension extends Extension {
         this.#log('disabling extension.');
         this.#indicator?.destroy();
         this.#indicator = null;
+        this.#settings = null;
+    }
+
+    #setupPopupMenu() {
+        const enableDisableMenuItem = new PopupMenu.PopupSwitchMenuItem(
+            _('Enable/Disable'),
+            this.#settings.get_boolean('enabled')
+        );
+        enableDisableMenuItem.connect('activate', () => {
+            this.#indicator.toggleEnableDisable();
+        });
+        this.#indicator.menu.addMenuItem(enableDisableMenuItem);
+        this.#indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.#indicator.menu.addAction(_('Settings'), () => {
+            this.openPreferences();
+        });
     }
 
     /**
