@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: gnome-shell-extension-mumble-ping 5\n"
+"Project-Id-Version: gnome-shell-extension-mumble-ping-6\n"
 "Report-Msgid-Bugs-To: https://github.com/maweil/gnome-shell-extension-mumble-ping/issues\n"
 "POT-Creation-Date: 2023-04-02 22:31+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -17,30 +17,38 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: extension.js:36
+#: extension.js:63
 msgid "Mumble Ping"
 msgstr ""
 
-#: extension.js:142
-msgid "Settings"
-msgstr ""
-
-#: extension.js:146
+#: extension.js:168
 msgid "Enable/Disable"
 msgstr ""
 
-#: prefs.js:46
+#: extension.js:174
+msgid "Settings"
+msgstr ""
+
+#: prefs.js:12
+msgid "General Settings"
+msgstr ""
+
+#: prefs.js:15
+msgid "Connection"
+msgstr ""
+
+#: prefs.js:18
 msgid "Poll Server Every (sec)"
 msgstr ""
 
-#: prefs.js:56
+#: prefs.js:31
 msgid "Mumble Server"
 msgstr ""
 
-#: prefs.js:62
+#: prefs.js:34
 msgid "Mumble Port"
 msgstr ""
 
-#: prefs.js:71
+#: prefs.js:48
 msgid "Debug Mode"
 msgstr ""
