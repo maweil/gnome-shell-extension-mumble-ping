@@ -78,9 +78,9 @@ const MumblePingIndicator = GObject.registerClass(
               y_expand: true,
               y_align: Clutter.ActorAlign.CENTER,
           });
-          menuLayout.add_actor(this.#mumbleIcon);
-          menuLayout.add_actor(this.#numUsersLabel);
-          this.add_actor(menuLayout);
+          menuLayout.add_child(this.#mumbleIcon);
+          menuLayout.add_child(this.#numUsersLabel);
+          this.add_child(menuLayout);
       }
 
       #attachSignalHandler(signalName) {
