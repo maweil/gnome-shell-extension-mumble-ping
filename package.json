@@ -6,7 +6,9 @@
   "private": true,
   "module": "extension.js",
   "type": "module",
+  "sideEffects": false,
   "scripts": {
+    "format": "prettier -w ./*.js && eslint . --fix",
     "lint": "eslint *.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,9 +20,14 @@
   "author": "Maximilian Weiler (https://github.com/maweil)",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "eslint": "^8.x",
+    "eslint": "^8.57.0",
     "eslint-plugin-jsdoc": "^48.2.3",
     "prettier": "^3.0.3",
-    "prettier-eslint": "16.3.0"
+    "prettier-eslint": "16.3.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@girs/gjs": "^3.3.0",
+    "@girs/gnome-shell": "^46.0.0-beta6"
   }
 }

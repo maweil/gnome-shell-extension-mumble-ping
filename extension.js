@@ -30,28 +30,74 @@ const Settings = {
     REFRESH_TIMEOUT: 'refresh-timeout',
 };
 
+/**
+ * @typedef {object} PingResponse
+ * @property {number} users Current number of users
+ * @property {number} maxUsers Maximum number of users configured by the server
+ */
+
 const MumblePingIndicator = GObject.registerClass(
   class Indicator extends PanelMenu.Button {
+      /**
+       * @type {Gio.Settings}
+       */
       #settings;
+      /**
+       * @type {St.Icon}
+       */
       #mumbleIcon;
+      /**
+       * @type {St.Label}
+       */
       #numUsersLabel;
       #settingsSignalHandlers;
       #indicatorStatus;
+      /**
+       * @type {boolean}
+       */
       #isDebugModeEnabled;
+      /**
+       * @type {Gio.Cancellable?}
+       */
       #autoCancel;
+      /**
+       * @type {Gio.SocketConnection?}
+       */
       #connection;
+      /**
+       * Timeout ID
+       *
+       * @type {number?}
+       */
       #mainLoopTimeout;
+      /**
+       * @type {import('@girs/gnome-shell/extensions/extension').ExtensionMetadata}
+       */
       #metadata;
       #dir;
 
-      constructor(params = {}) {
+      /**
+       * @typedef {object} MumblePingConstructorParams
+       * @property {Gio.File} dir
+       * @property {import('@girs/gnome-shell/extensions/extension').ExtensionMetadata} metadata
+       * @property {Gio.Settings} settings
+       */
+
+      /**
+       *
+       * @param {MumblePingConstructorParams} params
+       */
+      constructor(params) {
           super(0.0, _('Mumble Ping'), false);
           this.#settings = params.settings;
           this.#metadata = params.metadata;
           this.#dir = params.dir;
           this.#settingsSignalHandlers = [];
           this.#indicatorStatus = {
-              lastResponse: null,
+              lastResponse: {
+                  users: 0,
+                  maxUsers: 0,
+              },
               status: Status.NEUTRAL,
           };
           this.#isDebugModeEnabled = this.#settings.get_boolean('debug');
@@ -70,19 +116,22 @@ const MumblePingIndicator = GObject.registerClass(
       #setupWidgets() {
           const menuLayout = new St.BoxLayout();
           this.#mumbleIcon = new St.Icon({
-              style_class: 'system-status-icon',
+              styleClass: 'system-status-icon',
           });
           this.#setIndicatorIcon(Icon.NEUTRAL);
           this.#numUsersLabel = new St.Label({
               text: '',
-              y_expand: true,
-              y_align: Clutter.ActorAlign.CENTER,
+              yExpand: true,
+              yAlign: Clutter.ActorAlign.CENTER,
           });
           menuLayout.add_child(this.#mumbleIcon);
           menuLayout.add_child(this.#numUsersLabel);
           this.add_child(menuLayout);
       }
 
+      /**
+       * @param {string} signalName
+       */
       #attachSignalHandler(signalName) {
           const restart = () => {
               this.#stopMainLoop();
@@ -205,18 +254,24 @@ const MumblePingIndicator = GObject.registerClass(
           }
       }
 
+      /**
+       * Set mumble status indicator icon
+       *
+       * @param {string} iconFileName
+       */
       #setIndicatorIcon(iconFileName) {
           const iconPath = this.#dir
         .get_child('icons')
         .get_child(iconFileName)
         .get_path();
+          // @ts-ignore
           this.#mumbleIcon.set_gicon(Gio.Icon.new_for_string(iconPath));
       }
 
       /**
        * Update the indicator based on the ping response
        *
-       * @param {object} pingResponse Response of the status ping
+       * @param {PingResponse} pingResponse Response of the status ping
        */
       #updateIndicator(pingResponse) {
           if (this.#hasStatusChanged(pingResponse)) {
@@ -246,6 +301,11 @@ const MumblePingIndicator = GObject.registerClass(
           this.#setIndicatorToError();
       }
 
+      /**
+       *
+       * @param {PingResponse} result
+       * @returns {boolean}
+       */
       #hasStatusChanged(result) {
           if (!result)
               return false;
@@ -268,13 +328,18 @@ const MumblePingIndicator = GObject.registerClass(
           this.#settingsSignalHandlers = null;
           this.#indicatorStatus = null;
           this.#settings = null;
-          super._onDestroy();
+          super.destroy();
       }
   }
 );
 
 export default class MumblePingExtension extends Extension {
+    // @ts-ignore
     #indicator;
+    /**
+     * @type {Gio.Settings}
+     */
+    // @ts-ignore
     #settings;
 
     enable() {
@@ -317,6 +382,6 @@ export default class MumblePingExtension extends Extension {
      */
     #log(msg) {
         if (this.#settings.get_boolean('debug'))
-            console.log(`${this.metadata.name}: ${msg}`);
+            console.debug(`${this.metadata.name}: ${msg}`);
     }
 }
