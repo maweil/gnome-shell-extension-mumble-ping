@@ -1,10 +1,7 @@
 {
     "compilerOptions": {
-        "allowJs": true,
-        "checkJs": false,
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
-        "outDir": "./dist",
         "sourceMap": false,
         "strict": true,
         "target": "ES2022",
@@ -16,8 +13,8 @@
         "ambient.d.ts",
     ],
     "files": [
-        "extension.js",
-        "prefs.js",
-        "mumblePing.js"
+        "extension.ts",
+        "prefs.ts",
+        "mumblePing.ts"
     ],
 }
