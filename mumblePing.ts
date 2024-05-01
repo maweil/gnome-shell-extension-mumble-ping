@@ -84,10 +84,10 @@ function _readBytesFromConnection(
 }
 
 export interface MumblePingResult {
-  version?: string;
-  users: number;
-  maxUsers: number;
-  bandwidth?: number;
+    version?: string;
+    users: number;
+    maxUsers: number;
+    bandwidth?: number;
 }
 
 /**

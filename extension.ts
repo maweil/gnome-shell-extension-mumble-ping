@@ -14,32 +14,32 @@ import * as MumblePing from './mumblePing.js';
 import {ExtensionMetadata} from '@girs/gnome-shell/extensions/extension';
 
 interface MumblePingConstructorParams {
-  settings: Gio.Settings;
-  dir: Gio.File;
-  metadata: ExtensionMetadata;
+    settings: Gio.Settings;
+    dir: Gio.File;
+    metadata: ExtensionMetadata;
 }
 
 const enum Status {
-  DISABLED = 0,
-  NEUTRAL = 1,
-  ERROR = 2,
-  WAITING = 3,
+    DISABLED = 0,
+    NEUTRAL = 1,
+    ERROR = 2,
+    WAITING = 3,
 }
 
 const enum Icon {
-  NEUTRAL = 'icon_neutral.svg',
-  ERROR = 'icon_red.svg',
+    NEUTRAL = 'icon_neutral.svg',
+    ERROR = 'icon_red.svg',
 }
 
 const enum Settings {
-  MUMBLE_PORT = 'mumble-port',
-  MUMBLE_HOST = 'mumble-host',
-  REFRESH_TIMEOUT = 'refresh-timeout',
+    MUMBLE_PORT = 'mumble-port',
+    MUMBLE_HOST = 'mumble-host',
+    REFRESH_TIMEOUT = 'refresh-timeout',
 }
 
 interface IndicatorStatus {
-  lastResponse: MumblePing.MumblePingResult;
-  status: Status;
+    lastResponse: MumblePing.MumblePingResult;
+    status: Status;
 }
 
 class MumbleIndicatorButton extends PanelMenu.Button {
@@ -122,7 +122,7 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     #setIndicatorToWaiting() {
         if (this.#indicatorStatus!.status !== Status.WAITING) {
             this.#numUsersLabel?.set_text('...');
-      this.#indicatorStatus!.status = Status.WAITING;
+            this.#indicatorStatus!.status = Status.WAITING;
         }
     }
 
@@ -131,10 +131,10 @@ class MumbleIndicatorButton extends PanelMenu.Button {
         this.#attachSignalHandler(Settings.MUMBLE_HOST);
         this.#attachSignalHandler(Settings.REFRESH_TIMEOUT);
         this.#settingsSignalHandlers?.push(
-      this.#settings!.connect('changed::debug', () => {
-          this.#log('Changed debug mode setting');
-          this.#isDebugModeEnabled = this.#settings!.get_boolean('debug');
-      })
+            this.#settings!.connect('changed::debug', () => {
+                this.#log('Changed debug mode setting');
+                this.#isDebugModeEnabled = this.#settings!.get_boolean('debug');
+            })
         );
     }
 
@@ -151,11 +151,11 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     #startMainLoop() {
         this.#mainLoopTimeout = GLib.timeout_add_seconds(
             GLib.PRIORITY_DEFAULT,
-      this.#settings!.get_int(Settings.REFRESH_TIMEOUT),
-      () => {
-          this.#mainLoop();
-          return true;
-      }
+            this.#settings!.get_int(Settings.REFRESH_TIMEOUT),
+            () => {
+                this.#mainLoop();
+                return true;
+            }
         );
     }
 
@@ -173,19 +173,21 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     toggleEnableDisable() {
         const enabledNow = !this.#settings!.get_boolean('enabled');
         this.#log(
-            `Setting status of indicator to ${enabledNow ? 'enabled' : 'disabled'}`
+            `Setting status of indicator to ${
+                enabledNow ? 'enabled' : 'disabled'
+            }`
         );
         this.#stopMainLoop();
-    this.#settings!.set_boolean('enabled', enabledNow);
-    if (enabledNow) {
-        this.#setIndicatorToWaiting();
-        this.#mainLoop();
-        this.#startMainLoop();
-    } else {
-        this.#cancelPendingRequests();
-      this.#numUsersLabel!.set_text('');
-      this.#indicatorStatus!.status = Status.DISABLED;
-    }
+        this.#settings!.set_boolean('enabled', enabledNow);
+        if (enabledNow) {
+            this.#setIndicatorToWaiting();
+            this.#mainLoop();
+            this.#startMainLoop();
+        } else {
+            this.#cancelPendingRequests();
+            this.#numUsersLabel!.set_text('');
+            this.#indicatorStatus!.status = Status.DISABLED;
+        }
     }
 
     #cancelPendingRequests() {
@@ -202,9 +204,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
                 const host = this.#settings!.get_string(Settings.MUMBLE_HOST);
                 this.#log(`Connecting to ${host} on port ${port}`);
                 this.#connection = await MumblePing.createClient(
-          host!,
-          port,
-          this.#autoCancel
+                    host!,
+                    port,
+                    this.#autoCancel
                 );
             }
             this.#log('Sending Ping');
@@ -232,9 +234,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
      */
     #setIndicatorIcon(iconFileName: string) {
         const iconPath = this.#dir
-      .get_child('icons')
-      .get_child(iconFileName)
-      .get_path();
+            .get_child('icons')
+            .get_child(iconFileName)
+            .get_path();
         this.#mumbleIcon?.set_gicon(Gio.Icon.new_for_string(iconPath!));
     }
 
@@ -251,8 +253,8 @@ class MumbleIndicatorButton extends PanelMenu.Button {
             if (this.#indicatorStatus!.status !== Status.NEUTRAL)
                 this.#setIndicatorIcon(Icon.NEUTRAL);
 
-      this.#indicatorStatus!.lastResponse = pingResponse;
-      this.#indicatorStatus!.status = Status.NEUTRAL;
+            this.#indicatorStatus!.lastResponse = pingResponse;
+            this.#indicatorStatus!.status = Status.NEUTRAL;
         }
     }
 
@@ -278,17 +280,17 @@ class MumbleIndicatorButton extends PanelMenu.Button {
         const lastMaxUsers = this.#indicatorStatus!.lastResponse?.maxUsers;
         const lastStatus = this.#indicatorStatus!.status;
         const updateNeeded =
-      result.users !== lastNumUsers ||
-      result.maxUsers !== lastMaxUsers ||
-      lastStatus !== Status.NEUTRAL;
+            result.users !== lastNumUsers ||
+            result.maxUsers !== lastMaxUsers ||
+            lastStatus !== Status.NEUTRAL;
         return updateNeeded;
     }
 
-    _onDestroy() {
+    destroy() {
         this.#stopMainLoop();
         this.#cancelPendingRequests();
         this.#settingsSignalHandlers?.forEach(handle => {
-      this.#settings!.disconnect(handle);
+            this.#settings!.disconnect(handle);
         });
         this.#settingsSignalHandlers = null;
         this.#indicatorStatus = null;
@@ -324,7 +326,7 @@ export default class MumblePingExtension extends Extension {
     #setupPopupMenu() {
         const enableDisableMenuItem = new PopupMenu.PopupSwitchMenuItem(
             _('Enable/Disable'),
-      this.#settings!.get_boolean('enabled')
+            this.#settings!.get_boolean('enabled')
         );
         enableDisableMenuItem.connect('activate', () => {
             this.#indicator?.toggleEnableDisable();
