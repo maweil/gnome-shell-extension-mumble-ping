@@ -1,57 +1,67 @@
-import Gio from "gi://Gio";
+import Gio from 'gi://Gio';
 const MUMBLE_PING_BODY = [0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8];
 const MUMBLE_PING_RESPONSE_LEN = 24;
 
 Gio._promisify(
-  Gio.SocketClient.prototype,
-  "connect_to_host_async",
-  "connect_to_host_finish",
+    Gio.SocketClient.prototype,
+    'connect_to_host_async',
+    'connect_to_host_finish'
 );
-Gio._promisify(Gio.OutputStream.prototype, "write_async", "write_finish");
+Gio._promisify(Gio.OutputStream.prototype, 'write_async', 'write_finish');
 Gio._promisify(
-  Gio.InputStream.prototype,
-  "read_bytes_async",
-  "read_bytes_finish",
+    Gio.InputStream.prototype,
+    'read_bytes_async',
+    'read_bytes_finish'
 );
 
+export class EmptyPingResultError extends Error {
+    constructor(msg: string) {
+        super(msg);
+
+        // Set the prototype explicitly.
+        Object.setPrototypeOf(this, EmptyPingResultError.prototype);
+    }
+}
+
 function _readUInt32BE(bytes: Uint8Array, startPosition: number) {
-  let result = 0;
-  let shift = 24;
-  for (let i = startPosition; i < startPosition + 4; i++) {
-    result += bytes[i] << shift;
-    shift -= 8;
-  }
-  return result;
+    let result = 0;
+    let shift = 24;
+    for (let i = startPosition; i < startPosition + 4; i++) {
+        result += bytes[i] << shift;
+        shift -= 8;
+    }
+    return result;
 }
 
 function _parseResponseBytes(responseBytes: Uint8Array) {
-  const version = [];
-  for (let i = 1; i < 4; i++) version.push(Number(responseBytes[i]));
+    const version = [];
+    for (let i = 1; i < 4; i++)
+        version.push(Number(responseBytes[i]));
 
-  const versionStr = version.join(".");
-  const numUsersConnected = _readUInt32BE(responseBytes, 12);
-  const numMaxUsers = _readUInt32BE(responseBytes, 16);
-  const bandwidth = _readUInt32BE(responseBytes, 20);
-  const result = {
-    version: versionStr,
-    users: numUsersConnected,
-    maxUsers: numMaxUsers,
-    bandwidth,
-  };
-  return result;
+    const versionStr = version.join('.');
+    const numUsersConnected = _readUInt32BE(responseBytes, 12);
+    const numMaxUsers = _readUInt32BE(responseBytes, 16);
+    const bandwidth = _readUInt32BE(responseBytes, 20);
+    const result = {
+        version: versionStr,
+        users: numUsersConnected,
+        maxUsers: numMaxUsers,
+        bandwidth,
+    };
+    return result;
 }
 
 async function _writeByteString(
-  connection: Gio.SocketConnection,
-  byteString: Iterable<number>,
-  cancellable: Gio.Cancellable,
+    connection: Gio.SocketConnection,
+    byteString: Iterable<number>,
+    cancellable: Gio.Cancellable
 ) {
-  const bytesWritten = await connection.outputStream.write_async(
-    Uint8Array.from(byteString),
-    0,
-    cancellable,
-  );
-  return bytesWritten;
+    const bytesWritten = await connection.outputStream.write_async(
+        Uint8Array.from(byteString),
+        0,
+        cancellable
+    );
+    return bytesWritten;
 }
 
 /**
@@ -62,15 +72,15 @@ async function _writeByteString(
  * @param cancellable
  */
 function _readBytesFromConnection(
-  connection: Gio.SocketConnection,
-  numBytesToRead: number,
-  cancellable: Gio.Cancellable,
+    connection: Gio.SocketConnection,
+    numBytesToRead: number,
+    cancellable: Gio.Cancellable
 ) {
-  return connection.inputStream.read_bytes_async(
-    numBytesToRead,
-    0,
-    cancellable,
-  );
+    return connection.inputStream.read_bytes_async(
+        numBytesToRead,
+        0,
+        cancellable
+    );
 }
 
 export interface MumblePingResult {
@@ -89,14 +99,14 @@ export interface MumblePingResult {
  * @returns Promise resolving with UDP socket
  */
 export function createClient(
-  host: string,
-  port: number,
-  cancellable: Gio.Cancellable | null = null,
+    host: string,
+    port: number,
+    cancellable: Gio.Cancellable | null = null
 ) {
-  const udpSocket = new Gio.SocketClient();
-  udpSocket.protocol = Gio.SocketProtocol.UDP;
-  udpSocket.type = Gio.SocketType.DATAGRAM;
-  return udpSocket.connect_to_host_async(host, port, cancellable);
+    const udpSocket = new Gio.SocketClient();
+    udpSocket.protocol = Gio.SocketProtocol.UDP;
+    udpSocket.type = Gio.SocketType.DATAGRAM;
+    return udpSocket.connect_to_host_async(host, port, cancellable);
 }
 
 /**
@@ -105,14 +115,19 @@ export function createClient(
  * @param cancellable
  */
 export async function pingMumble(
-  connection: Gio.SocketConnection,
-  cancellable: Gio.Cancellable,
+    connection: Gio.SocketConnection,
+    cancellable: Gio.Cancellable
 ): Promise<MumblePingResult> {
-  await _writeByteString(connection, MUMBLE_PING_BODY, cancellable);
-  const responseBytes = await _readBytesFromConnection(
-    connection,
-    MUMBLE_PING_RESPONSE_LEN,
-    cancellable,
-  );
-  return _parseResponseBytes(responseBytes.get_data() || Uint8Array.from([]));
+    await _writeByteString(connection, MUMBLE_PING_BODY, cancellable);
+    const responseBytes = await _readBytesFromConnection(
+        connection,
+        MUMBLE_PING_RESPONSE_LEN,
+        cancellable
+    );
+    if (responseBytes.get_size() > 0) {
+        const responseData = responseBytes.get_data();
+        return _parseResponseBytes(responseData!);
+    } else {
+        throw new EmptyPingResultError('Response to UDP Ping was empty');
+    }
 }
