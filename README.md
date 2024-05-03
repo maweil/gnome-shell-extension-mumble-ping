@@ -53,6 +53,7 @@ This extension requires one of the following Gnome Shell versions:
 - 43
 - 44
 - 45
+- 46
 
 ### Installation
 
@@ -104,13 +105,6 @@ Then start a nested gnome shell session:
 ```bash
 # Start a nested gnome shell
 dbus-run-session -- gnome-shell --nested --wayland
-```
-
-### Using X
-
-```bash
-# Start a nested gnome shell
-dbus-run-session -- gnome-shell --nested
 ```
 
 ## 🎈 Usage <a name="usage"></a>
