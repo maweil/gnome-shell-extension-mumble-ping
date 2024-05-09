@@ -4,4 +4,4 @@ node_modules/
 locale/
 dist/
 lint/
-.eslintrc.yml
+*.js

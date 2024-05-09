@@ -8,8 +8,8 @@ import {
 const MAX_UNIX_PORT = 65535;
 
 export default class MumblePingPreferences extends ExtensionPreferences {
-    fillPreferencesWindow(window) {
-        window._settings = this.getSettings();
+    private _settings: Gio.Settings = this.getSettings();
+    fillPreferencesWindow(window: Adw.PreferencesWindow) {
         const page = new Adw.PreferencesPage();
         const generalSettings = new Adw.PreferencesGroup({
             title: _('General Settings'),
@@ -23,11 +23,11 @@ export default class MumblePingPreferences extends ExtensionPreferences {
                 value: 120,
                 lower: 1,
                 upper: 3600,
-                step_increment: 1,
-                page_increment: 1,
-                page_size: 10,
+                stepIncrement: 1,
+                pageIncrement: 1,
+                pageSize: 10,
             }),
-            climb_rate: 2,
+            climbRate: 2,
             digits: 0,
         });
         const hostnameRow = new Adw.EntryRow({
@@ -39,11 +39,11 @@ export default class MumblePingPreferences extends ExtensionPreferences {
                 value: 64738,
                 lower: 1,
                 upper: MAX_UNIX_PORT,
-                step_increment: 1,
-                page_increment: 1,
-                page_size: 10,
+                stepIncrement: 1,
+                pageIncrement: 1,
+                pageSize: 10,
             }),
-            climb_rate: 1,
+            climbRate: 1,
             digits: 0,
         });
 
@@ -60,25 +60,25 @@ export default class MumblePingPreferences extends ExtensionPreferences {
         page.add(connectionSettings);
         window.add(page);
 
-        window._settings.bind(
+        this._settings.bind(
             'refresh-timeout',
             refreshTimeoutRow,
             'value',
             Gio.SettingsBindFlags.DEFAULT
         );
-        window._settings.bind(
+        this._settings.bind(
             'mumble-host',
             hostnameRow,
             'text',
             Gio.SettingsBindFlags.DEFAULT
         );
-        window._settings.bind(
+        this._settings.bind(
             'mumble-port',
             portRow,
             'value',
             Gio.SettingsBindFlags.DEFAULT
         );
-        window._settings.bind(
+        this._settings.bind(
             'debug',
             debugRow,
             'active',

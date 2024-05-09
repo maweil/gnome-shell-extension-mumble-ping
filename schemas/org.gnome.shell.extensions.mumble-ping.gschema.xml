@@ -4,7 +4,7 @@
   <schema id="org.gnome.shell.extensions.mumble-ping" path="/org/gnome/shell/extensions/mumble-ping/">
 
     <key type="i" name="refresh-timeout">
-      <default>5</default>
+      <default>120</default>
       <summary>Refresh After Seconds</summary>
       <description>Refresh Interval in Seconds</description>
     </key>
