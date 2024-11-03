@@ -1,3 +1,4 @@
+/* eslint-disable require-await */
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import Adw from 'gi://Adw';
@@ -9,7 +10,7 @@ const MAX_UNIX_PORT = 65535;
 
 export default class MumblePingPreferences extends ExtensionPreferences {
     private _settings: Gio.Settings = this.getSettings();
-    fillPreferencesWindow(window: Adw.PreferencesWindow) {
+    async fillPreferencesWindow(window: Adw.PreferencesWindow) {
         const page = new Adw.PreferencesPage();
         const generalSettings = new Adw.PreferencesGroup({
             title: _('General Settings'),

@@ -1,3 +1,4 @@
+import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 const MUMBLE_PING_BODY = [0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8];
 const MUMBLE_PING_RESPONSE_LEN = 24;
@@ -75,12 +76,12 @@ function _readBytesFromConnection(
     connection: Gio.SocketConnection,
     numBytesToRead: number,
     cancellable: Gio.Cancellable
-) {
+): GLib.Bytes {
     return connection.inputStream.read_bytes_async(
         numBytesToRead,
         0,
         cancellable
-    );
+    ) as unknown as GLib.Bytes;
 }
 
 export interface MumblePingResult {
@@ -102,11 +103,15 @@ export function createClient(
     host: string,
     port: number,
     cancellable: Gio.Cancellable | null = null
-) {
+): Gio.SocketConnection {
     const udpSocket = new Gio.SocketClient();
     udpSocket.protocol = Gio.SocketProtocol.UDP;
     udpSocket.type = Gio.SocketType.DATAGRAM;
-    return udpSocket.connect_to_host_async(host, port, cancellable);
+    return udpSocket.connect_to_host_async(
+        host,
+        port,
+        cancellable
+    ) as unknown as Gio.SocketConnection;
 }
 
 /**
