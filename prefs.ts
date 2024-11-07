@@ -10,7 +10,7 @@ const MAX_UNIX_PORT = 65535;
 
 export default class MumblePingPreferences extends ExtensionPreferences {
     private _settings: Gio.Settings = this.getSettings();
-    async fillPreferencesWindow(window: Adw.PreferencesWindow) {
+    fillPreferencesWindow(window: Adw.PreferencesWindow) {
         const page = new Adw.PreferencesPage();
         const generalSettings = new Adw.PreferencesGroup({
             title: _('General Settings'),
@@ -85,5 +85,6 @@ export default class MumblePingPreferences extends ExtensionPreferences {
             'active',
             Gio.SettingsBindFlags.DEFAULT
         );
+        return Promise.resolve()
     }
 }

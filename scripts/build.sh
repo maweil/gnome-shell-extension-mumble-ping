@@ -16,8 +16,4 @@ npx -p typescript tsc \
     --podir ./po \
     -o dist \
     --force
-echo "Removing compiled settings schema (not allowed for GNOME 45)"
-echo $line
-zip -d dist/mumble-ping*.zip "/schemas/gschemas.compiled"
-echo $line
 echo "Done!"
