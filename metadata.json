@@ -6,6 +6,7 @@
   "gettext-domain": "mumble-ping",
   "url": "https://github.com/maweil/gnome-shell-extension-mumble-ping",
   "shell-version": [
-    "46"
+    "46",
+    "47"
   ]
 }
