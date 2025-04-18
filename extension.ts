@@ -5,7 +5,8 @@ import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 import {
     Extension,
-    gettext as _
+    gettext as _,
+    ConsoleLike
 } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
@@ -101,8 +102,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     }
 
     #attachSignalHandler(signalName: string) {
-        if (this.#settings === null)
+        if (this.#settings === null) {
             return;
+        }
 
         const restart = () => {
             this.#stopMainLoop();
@@ -144,8 +146,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
      * @param msg Message to log
      */
     #log(msg: string) {
-        if (this.#isDebugModeEnabled)
+        if (this.#isDebugModeEnabled) {
             console.log(`${this.#metadata.name}: ${msg}`);
+        }
     }
 
     #startMainLoop() {
@@ -250,8 +253,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
             this.#numUsersLabel?.set_text(
                 `${pingResponse.users}/${pingResponse.maxUsers}`
             );
-            if (this.#indicatorStatus!.status !== Status.NEUTRAL)
+            if (this.#indicatorStatus!.status !== Status.NEUTRAL) {
                 this.#setIndicatorIcon(Icon.NEUTRAL);
+            }
 
             this.#indicatorStatus!.lastResponse = pingResponse;
             this.#indicatorStatus!.status = Status.NEUTRAL;
@@ -259,8 +263,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     }
 
     #setIndicatorToError() {
-        if (!this.#indicatorStatus?.status)
+        if (!this.#indicatorStatus?.status) {
             return;
+        }
         if (this.#indicatorStatus.status !== Status.ERROR) {
             this.#setIndicatorIcon(Icon.ERROR);
             this.#numUsersLabel?.set_text('');
@@ -274,8 +279,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     }
 
     #hasStatusChanged(result: MumblePing.MumblePingResult): boolean {
-        if (!result)
+        if (!result) {
             return false;
+        }
         const lastNumUsers = this.#indicatorStatus!.lastResponse?.users;
         const lastMaxUsers = this.#indicatorStatus!.lastResponse?.maxUsers;
         const lastStatus = this.#indicatorStatus!.status;
@@ -304,8 +310,10 @@ const MumblePingIndicator = GObject.registerClass(MumbleIndicatorButton);
 export default class MumblePingExtension extends Extension {
     #indicator: MumbleIndicatorButton | undefined | null;
     #settings?: Gio.Settings | null;
+    #logger: ConsoleLike | undefined | null;
 
     enable() {
+        this.#logger = this.getLogger();
         this.#settings = this.getSettings();
         this.#indicator = new MumblePingIndicator({
             metadata: this.metadata,
@@ -321,6 +329,7 @@ export default class MumblePingExtension extends Extension {
         this.#indicator?.destroy();
         this.#indicator = null;
         this.#settings = null;
+        this.#logger = null;
     }
 
     #setupPopupMenu() {
@@ -351,7 +360,8 @@ export default class MumblePingExtension extends Extension {
      * @param msg Message to log
      */
     #log(msg: string) {
-        if (this.#settings!.get_boolean('debug'))
-            console.debug(`${this.metadata.name}: ${msg}`);
+        if (this.#settings!.get_boolean('debug')) {
+            this.#logger!.debug(msg);
+        }
     }
 }

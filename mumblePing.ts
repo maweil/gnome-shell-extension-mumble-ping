@@ -36,8 +36,9 @@ function _readUInt32BE(bytes: Uint8Array, startPosition: number) {
 
 function _parseResponseBytes(responseBytes: Uint8Array) {
     const version = [];
-    for (let i = 1; i < 4; i++)
+    for (let i = 1; i < 4; i++) {
         version.push(Number(responseBytes[i]));
+    }
 
     const versionStr = version.join('.');
     const numUsersConnected = _readUInt32BE(responseBytes, 12);
