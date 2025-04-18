@@ -24,13 +24,14 @@ export default [...compat.extends(
 
     languageOptions: {
         parser: tsParser,
-        ecmaVersion: 5,
+        ecmaVersion: 2022,
         sourceType: 'module',
     },
 
     rules: {
         'jsdoc/require-param-type': 'off',
         'no-shadow': 'off',
+        'curly': ['error', 'all'],
         '@typescript-eslint/no-shadow': 'error',
         '@typescript-eslint/no-explicit-any': 'off',
     },

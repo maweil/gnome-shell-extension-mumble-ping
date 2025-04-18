@@ -12,7 +12,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as MumblePing from './mumblePing.js';
-import { ExtensionMetadata } from '@girs/gnome-shell/extensions/extension';
+import {ExtensionMetadata} from '@girs/gnome-shell/extensions/extension';
 
 interface MumblePingConstructorParams {
     settings: Gio.Settings;
@@ -102,8 +102,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     }
 
     #attachSignalHandler(signalName: string) {
-        if (this.#settings === null)
+        if (this.#settings === null) {
             return;
+        }
 
         const restart = () => {
             this.#stopMainLoop();
@@ -145,8 +146,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
      * @param msg Message to log
      */
     #log(msg: string) {
-        if (this.#isDebugModeEnabled)
+        if (this.#isDebugModeEnabled) {
             console.log(`${this.#metadata.name}: ${msg}`);
+        }
     }
 
     #startMainLoop() {
@@ -174,7 +176,8 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     toggleEnableDisable() {
         const enabledNow = !this.#settings!.get_boolean('enabled');
         this.#log(
-            `Setting status of indicator to ${enabledNow ? 'enabled' : 'disabled'
+            `Setting status of indicator to ${
+                enabledNow ? 'enabled' : 'disabled'
             }`
         );
         this.#stopMainLoop();
@@ -250,8 +253,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
             this.#numUsersLabel?.set_text(
                 `${pingResponse.users}/${pingResponse.maxUsers}`
             );
-            if (this.#indicatorStatus!.status !== Status.NEUTRAL)
+            if (this.#indicatorStatus!.status !== Status.NEUTRAL) {
                 this.#setIndicatorIcon(Icon.NEUTRAL);
+            }
 
             this.#indicatorStatus!.lastResponse = pingResponse;
             this.#indicatorStatus!.status = Status.NEUTRAL;
@@ -259,8 +263,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     }
 
     #setIndicatorToError() {
-        if (!this.#indicatorStatus?.status)
+        if (!this.#indicatorStatus?.status) {
             return;
+        }
         if (this.#indicatorStatus.status !== Status.ERROR) {
             this.#setIndicatorIcon(Icon.ERROR);
             this.#numUsersLabel?.set_text('');
@@ -274,8 +279,9 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     }
 
     #hasStatusChanged(result: MumblePing.MumblePingResult): boolean {
-        if (!result)
+        if (!result) {
             return false;
+        }
         const lastNumUsers = this.#indicatorStatus!.lastResponse?.users;
         const lastMaxUsers = this.#indicatorStatus!.lastResponse?.maxUsers;
         const lastStatus = this.#indicatorStatus!.status;
