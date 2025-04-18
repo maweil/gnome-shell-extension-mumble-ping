@@ -5,13 +5,14 @@ import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 import {
     Extension,
-    gettext as _
+    gettext as _,
+    ConsoleLike
 } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as MumblePing from './mumblePing.js';
-import {ExtensionMetadata} from '@girs/gnome-shell/extensions/extension';
+import { ExtensionMetadata } from '@girs/gnome-shell/extensions/extension';
 
 interface MumblePingConstructorParams {
     settings: Gio.Settings;
@@ -173,8 +174,7 @@ class MumbleIndicatorButton extends PanelMenu.Button {
     toggleEnableDisable() {
         const enabledNow = !this.#settings!.get_boolean('enabled');
         this.#log(
-            `Setting status of indicator to ${
-                enabledNow ? 'enabled' : 'disabled'
+            `Setting status of indicator to ${enabledNow ? 'enabled' : 'disabled'
             }`
         );
         this.#stopMainLoop();
@@ -304,8 +304,10 @@ const MumblePingIndicator = GObject.registerClass(MumbleIndicatorButton);
 export default class MumblePingExtension extends Extension {
     #indicator: MumbleIndicatorButton | undefined | null;
     #settings?: Gio.Settings | null;
+    #logger: ConsoleLike | undefined | null;
 
     enable() {
+        this.#logger = this.getLogger();
         this.#settings = this.getSettings();
         this.#indicator = new MumblePingIndicator({
             metadata: this.metadata,
@@ -321,6 +323,7 @@ export default class MumblePingExtension extends Extension {
         this.#indicator?.destroy();
         this.#indicator = null;
         this.#settings = null;
+        this.#logger = null;
     }
 
     #setupPopupMenu() {
@@ -351,7 +354,8 @@ export default class MumblePingExtension extends Extension {
      * @param msg Message to log
      */
     #log(msg: string) {
-        if (this.#settings!.get_boolean('debug'))
-            console.debug(`${this.metadata.name}: ${msg}`);
+        if (this.#settings!.get_boolean('debug')) {
+            this.#logger!.debug(msg);
+        }
     }
 }
