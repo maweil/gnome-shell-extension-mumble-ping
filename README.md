@@ -54,6 +54,8 @@ This extension requires one of the following Gnome Shell versions:
 - 44
 - 45
 - 46
+- 47
+- 48
 
 ### Installation
 
