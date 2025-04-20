@@ -1,4 +1,3 @@
-/* eslint-disable require-await */
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import Adw from 'gi://Adw';
@@ -85,6 +84,6 @@ export default class MumblePingPreferences extends ExtensionPreferences {
             'active',
             Gio.SettingsBindFlags.DEFAULT
         );
-        return Promise.resolve()
+        return Promise.resolve();
     }
 }
